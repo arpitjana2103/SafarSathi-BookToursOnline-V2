@@ -1,8 +1,8 @@
 const express = require("express");
 const morgan = require("morgan");
 
-const { tourRouter } = require("./routes/tourRouter");
-const { userRouter } = require("./routes/userRouter");
+const { tourRouter } = require("./routes/tour.route");
+const { userRouter } = require("./routes/user.route");
 
 const app = express();
 
@@ -17,7 +17,4 @@ app.use(morgan("dev"));
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 
-const port = 3000;
-app.listen(port, function () {
-    console.log(`API URL : http://127.0.0.1:${port}/`);
-});
+module.exports = { app };

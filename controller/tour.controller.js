@@ -1,14 +1,10 @@
-const express = require("express");
 const fs = require("fs");
 
-console.log(__dirname);
-
-const tourRouter = express.Router();
 const filePath = `${__dirname}/../dev-data/data/tours-simple.json`;
 const toursDataTxt = fs.readFileSync(filePath, "utf-8");
 const toursData = JSON.parse(toursDataTxt);
 
-const getAllTour = function (req, res) {
+exports.getAllTour = function (req, res) {
     return res.status(200).json({
         status: "Success",
         results: toursData.length,
@@ -18,7 +14,7 @@ const getAllTour = function (req, res) {
     });
 };
 
-const getTour = function (req, res) {
+exports.getTour = function (req, res) {
     const id = Number(req.params.tourId);
 
     const tour = toursData.find(function (el) {
@@ -41,7 +37,7 @@ const getTour = function (req, res) {
     });
 };
 
-const createTour = function (req, res) {
+exports.createTour = function (req, res) {
     const newId = toursData[toursData.length - 1].id + 1;
     const newTour = { ...req.body, id: newId };
 
@@ -56,7 +52,7 @@ const createTour = function (req, res) {
     });
 };
 
-const updateTour = function (req, res) {
+exports.updateTour = function (req, res) {
     return res.status(200).json({
         status: "Success",
         data: {
@@ -64,8 +60,3 @@ const updateTour = function (req, res) {
         },
     });
 };
-
-tourRouter.route("/").get(getAllTour).post(createTour);
-tourRouter.route("/:id").get(getTour).post(updateTour);
-
-module.exports = { tourRouter };
