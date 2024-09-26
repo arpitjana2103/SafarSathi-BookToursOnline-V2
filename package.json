@@ -1,0 +1,28 @@
+{
+  "name": "safar-sathi-tour-booking-rest-api",
+  "version": "1.0.0",
+  "description": "safar-sathi-tour-booking-online-rest-api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arpitjana2103/Safar-Sathi-Book-Tour-Rest-API.git"
+  },
+  "keywords": [
+    "NodeJS",
+    "ExpressJS",
+    "MongoDB"
+  ],
+  "author": "Arpit Jana",
+  "license": "MIT License",
+  "bugs": {
+    "url": "https://github.com/arpitjana2103/Safar-Sathi-Book-Tour-Rest-API/issues"
+  },
+  "homepage": "https://github.com/arpitjana2103/Safar-Sathi-Book-Tour-Rest-API#readme",
+  "dependencies": {
+    "express": "^4.21.0",
+    "morgan": "^1.10.0"
+  }
+}
