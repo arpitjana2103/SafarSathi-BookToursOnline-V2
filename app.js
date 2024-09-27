@@ -12,7 +12,11 @@ app.use(function (req, res, next) {
     console.log("Hello from the middleware..");
     next();
 });
-app.use(morgan("dev"));
+
+if (process.env.NODE_ENV === "development") {
+    console.log("Condition true");
+    app.use(morgan("dev"));
+}
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
