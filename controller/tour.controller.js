@@ -42,7 +42,7 @@ exports.createTour = function (req, res) {
     const newTour = { ...req.body, id: newId };
 
     toursData.push(newTour);
-    fs.writeFile(filePath, JSON.stringify(toursData), function (error) {
+    fs.writeFile(filePath, JSON.stringify(toursData), function () {
         res.status(201).json({
             status: "Success",
             data: {
