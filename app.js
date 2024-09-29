@@ -14,7 +14,6 @@ app.use(function (req, res, next) {
 });
 
 if (process.env.NODE_ENV === "development") {
-    console.log("Condition true");
     app.use(morgan("dev"));
 }
 
