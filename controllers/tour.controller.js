@@ -50,3 +50,22 @@ exports.getTour = async function (req, res) {
         });
     }
 };
+
+exports.updateTour = async function (req, res) {
+    try {
+        const { id } = req.params;
+        const tour = await Tour.findByIdAndUpdate(id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+        return res.status(200).json({
+            status: "success",
+            tour: tour,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            status: "fail",
+            error: error,
+        });
+    }
+};
