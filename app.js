@@ -8,10 +8,6 @@ const app = express();
 
 // Middleware : Convert request into JSON
 app.use(express.json());
-app.use(function (req, res, next) {
-    console.log("Hello from the middleware..");
-    next();
-});
 
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
