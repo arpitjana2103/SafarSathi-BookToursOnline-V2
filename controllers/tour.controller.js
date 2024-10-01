@@ -86,6 +86,16 @@ exports.getAllTours = async function (req, res) {
     }
 };
 
+exports.aliasTopTours = async function (req, res, next) {
+    req.query = {
+        ...req.query,
+        limit: "5",
+        sort: "-ratingsAverage,price",
+        fields: "name,price,ratingsAverage,summery,difficulty",
+    };
+    next();
+};
+
 exports.getTour = async function (req, res) {
     try {
         const { id } = req.params;
