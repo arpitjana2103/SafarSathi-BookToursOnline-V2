@@ -17,9 +17,40 @@ exports.createTour = async function (req, res) {
     }
 };
 
+const processReqQuery = function (queryObj) {
+    // 1. Exclude prohibited fields
+    const excludeFields = ["page", "sort", "limit", "fields"];
+    excludeFields.forEach((field) => delete queryObj[field]);
+
+    // 2. Add '$' into comparison operators
+    let queryStr = JSON.stringify(queryObj);
+    const operators = ["gt", "gte", "lt", "lte"];
+    operators.forEach(function (operator) {
+        const regex = new RegExp(`(${operator})\\b`, "g");
+        queryStr = queryStr.replace(regex, `$${operator}`);
+    });
+    queryObj = JSON.parse(queryStr);
+
+    return queryObj;
+};
+
+const generageSortedBy = function (sortedBy) {
+    if (!sortedBy) return "-createdAt";
+    return sortedBy.replace(/,/g, " ");
+};
+
 exports.getAllTours = async function (req, res) {
     try {
-        const allTours = await Tour.find();
+        // 1. Filtering
+        const filterObj = processReqQuery({ ...req.query });
+        let query = Tour.find(filterObj);
+
+        // 2. Sorting
+        const sortedBy = generageSortedBy(req.query.sort);
+        query = query.sort(sortedBy);
+
+        const allTours = await query;
+
         return res.status(200).json({
             status: "success",
             data: {
