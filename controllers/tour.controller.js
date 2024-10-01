@@ -34,9 +34,14 @@ const processReqQuery = function (queryObj) {
     return queryObj;
 };
 
-const generageSortedBy = function (sortedBy) {
+const generateSortedBy = function (sortedBy) {
     if (!sortedBy) return "-createdAt";
     return sortedBy.replace(/,/g, " ");
+};
+
+const generateFields = function (fields) {
+    if (!fields) return "-__v";
+    return fields.replace(/,/g, " ");
 };
 
 exports.getAllTours = async function (req, res) {
@@ -46,16 +51,19 @@ exports.getAllTours = async function (req, res) {
         let query = Tour.find(filterObj);
 
         // 2. Sorting
-        const sortedBy = generageSortedBy(req.query.sort);
+        const sortedBy = generateSortedBy(req.query.sort);
         query = query.sort(sortedBy);
 
-        const allTours = await query;
+        // 3. Limit Fields
+        const fields = generateFields(req.query.fields);
+        query = query.select(fields);
+
+        const tours = await query;
 
         return res.status(200).json({
             status: "success",
-            data: {
-                tours: allTours,
-            },
+            count: tours.length,
+            data: { tours: tours },
         });
     } catch (error) {
         return res.status(400).json({
