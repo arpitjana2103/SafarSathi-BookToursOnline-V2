@@ -19,7 +19,7 @@ exports.createTour = async function (req, res) {
 
 const processReqQuery = function (queryObj) {
     // 1. Exclude prohibited fields
-    const excludeFields = ["page", "sort", "limit", "fields"];
+    const excludeFields = ["page", "limit", "sort", "fields"];
     excludeFields.forEach((field) => delete queryObj[field]);
 
     // 2. Add '$' into comparison operators
@@ -46,17 +46,23 @@ const generateFields = function (fields) {
 
 exports.getAllTours = async function (req, res) {
     try {
-        // 1. Filtering
+        // 1. Filter
         const filterObj = processReqQuery({ ...req.query });
         let query = Tour.find(filterObj);
 
-        // 2. Sorting
+        // 2. Sort
         const sortedBy = generateSortedBy(req.query.sort);
         query = query.sort(sortedBy);
 
         // 3. Limit Fields
         const fields = generateFields(req.query.fields);
         query = query.select(fields);
+
+        // 4. Pagination
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 3;
+        const skip = (page - 1) * limit;
+        query = query.skip(skip).limit(limit);
 
         const tours = await query;
 
