@@ -69,10 +69,16 @@ tourSchema.virtual("durationWeeks").get(function () {
     return this.duration / 7;
 });
 
-// DOCUMENT MEDDLEWARE:
+// DOCUMENT MEDDLEWARE / HOOK :
 // runs before Model.prototype.save() and Modle.create()
 tourSchema.pre("save", function (next) {
     this.slug = slugify(this.name, { lower: true });
+    next();
+});
+
+// runs after Model.prototype.save() and Modle.create()
+tourSchema.post("save", function (doc, next) {
+    // console.log(doc);
     next();
 });
 
