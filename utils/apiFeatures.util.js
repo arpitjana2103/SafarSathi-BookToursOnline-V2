@@ -23,7 +23,6 @@ class APIFeatures {
     }
 
     paginate() {
-        console.log(this.reqQuery);
         const page = Number(this.reqQuery.page) || 1;
         const limit = Number(this.reqQuery.limit) || 10;
         const skip = (page - 1) * limit;

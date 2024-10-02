@@ -48,6 +48,47 @@ exports.aliasTop5Cheap = async function (req, res, next) {
     next();
 };
 
+exports.getTourStats = async function (req, res) {
+    try {
+        const stats = await Tour.aggregate([
+            {
+                $match: {
+                    ratingsAverage: { $gte: 4.5 },
+                },
+            },
+            {
+                $group: {
+                    _id: "$difficulty",
+                    tourCount: { $sum: 1 },
+                    ratingsCount: { $sum: "$ratingsQuantity" },
+                    ratingAvg: { $avg: "$ratingsAverage" },
+                    priceAvg: { $avg: "$price" },
+                    priceMax: { $max: "$price" },
+                    priceMin: { $min: "$price" },
+                },
+            },
+            {
+                $addFields: {
+                    _difficulty: { $toUpper: "$_id" },
+                },
+            },
+            {
+                $unset: ["_id"],
+            },
+        ]);
+
+        return res.status(200).json({
+            status: "success",
+            stats: stats,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            status: "fail",
+            error: error,
+        });
+    }
+};
+
 exports.getTour = async function (req, res) {
     try {
         const { id } = req.params;
