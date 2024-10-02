@@ -16,7 +16,7 @@ class APIFeatures {
         return this;
     }
 
-    limit() {
+    limitFields() {
         const fields = APIFeatures.processFields(this.reqQuery.fields);
         this.query = this.query.select(fields);
         return this;
@@ -24,7 +24,7 @@ class APIFeatures {
 
     paginate() {
         const page = Number(this.reqQuery.page) || 1;
-        const limit = Number(this.reqQuery.limit) || 10;
+        const limit = Number(this.reqQuery.limit) || 50;
         const skip = (page - 1) * limit;
         this.query = this.query.skip(skip).limit(limit);
         return this;

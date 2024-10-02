@@ -57,6 +57,11 @@ const tourSchema = new mongoose.Schema(
             select: false,
         },
         startDates: [Date],
+        secretTour: {
+            type: Boolean,
+            default: false,
+            select: false,
+        },
     },
     {
         toJSON: { virtuals: true },
@@ -70,17 +75,35 @@ tourSchema.virtual("durationWeeks").get(function () {
 });
 
 // DOCUMENT MEDDLEWARE / HOOK :
-// runs before Model.prototype.save() and Modle.create()
+// runs before Model.prototype.save() and Model.create()
 tourSchema.pre("save", function (next) {
     this.slug = slugify(this.name, { lower: true });
     next();
 });
 
-// runs after Model.prototype.save() and Modle.create()
+// runs after Model.prototype.save() and Model.create()
 tourSchema.post("save", function (doc, next) {
     // console.log(doc);
     next();
 });
+
+// QUERY MIDDLEWARE / HOOK
+// runs before Model.find() but not for findOne()
+// Using regX /^find/ to work it for
+tourSchema.pre(/^find/, function (next) {
+    this.find({ secretTour: { $ne: true } });
+    this.start = Date.now();
+    next();
+});
+
+// runs after Model.find() but not for findOne()
+tourSchema.post(/^find/, function (docs, next) {
+    // console.log(docs);
+    // console.log(`Query took : ${Date.now() - this.start} milliseconds.`);
+    next();
+});
+
+// AGGREGATION MIDDLEWARE
 
 const Tour = mongoose.model("Tour", tourSchema);
 
