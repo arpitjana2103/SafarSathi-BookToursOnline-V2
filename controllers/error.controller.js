@@ -6,7 +6,14 @@ const globalErrorHandeller = function (err, req, res, next) {
         status: err.status,
         message: err.message,
         error: err,
+        stack: err.stack,
     });
 };
 
-module.exports = globalErrorHandeller;
+const catchAsyncErrors = function (fnc) {
+    return function (req, res, next) {
+        fnc(req, res, next).catch(next);
+    };
+};
+
+module.exports = { globalErrorHandeller, catchAsyncErrors };
