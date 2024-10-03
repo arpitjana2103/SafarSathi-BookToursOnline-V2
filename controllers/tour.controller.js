@@ -1,8 +1,9 @@
 const { Tour } = require("../models/tour.model");
 const { catchAsyncErrors } = require("./error.controller");
 const QueryFeatures = require("../utils/QueryFeatures");
+const AppError = require("../utils/AppError");
 
-exports.createTour = catchAsyncErrors(async function (req, res) {
+exports.createTour = catchAsyncErrors(async function (req, res, next) {
     const newTour = await Tour.create(req.body);
     return res.status(201).json({
         status: "success",
@@ -12,7 +13,7 @@ exports.createTour = catchAsyncErrors(async function (req, res) {
     });
 });
 
-exports.getAllTours = catchAsyncErrors(async function (req, res) {
+exports.getAllTours = catchAsyncErrors(async function (req, res, next) {
     const mongooseQuery = Tour.find();
     const queryFeatures = new QueryFeatures(mongooseQuery, req.query);
     const tourQuery = queryFeatures
@@ -39,7 +40,7 @@ exports.aliasTop5Cheap = catchAsyncErrors(async function (req, res, next) {
     next();
 });
 
-exports.getTourStats = catchAsyncErrors(async function (req, res) {
+exports.getTourStats = catchAsyncErrors(async function (req, res, next) {
     const stats = await Tour.aggregate([
         {
             $match: {
@@ -73,7 +74,7 @@ exports.getTourStats = catchAsyncErrors(async function (req, res) {
     });
 });
 
-exports.getMonthlyPlan = catchAsyncErrors(async function (req, res) {
+exports.getMonthlyPlan = catchAsyncErrors(async function (req, res, next) {
     const { year } = req.params;
     const plan = await Tour.aggregate([
         {
@@ -114,9 +115,14 @@ exports.getMonthlyPlan = catchAsyncErrors(async function (req, res) {
     });
 });
 
-exports.getTour = catchAsyncErrors(async function (req, res) {
+exports.getTour = catchAsyncErrors(async function (req, res, next) {
     const { id } = req.params;
     const tour = await Tour.findById(id);
+    console.log(tour);
+
+    if (!tour) {
+        return next(new AppError("No tour found with that ID", 404));
+    }
 
     return res.status(200).json({
         status: "success",
@@ -124,21 +130,30 @@ exports.getTour = catchAsyncErrors(async function (req, res) {
     });
 });
 
-exports.updateTour = catchAsyncErrors(async function (req, res) {
+exports.updateTour = catchAsyncErrors(async function (req, res, next) {
     const { id } = req.params;
     const tour = await Tour.findByIdAndUpdate(id, req.body, {
         new: true,
         runValidators: true,
     });
+
+    if (!tour) {
+        return next(new AppError("No tour found with that ID", 404));
+    }
+
     return res.status(200).json({
         status: "success",
         tour: tour,
     });
 });
 
-exports.deleteTour = catchAsyncErrors(async function (req, res) {
+exports.deleteTour = catchAsyncErrors(async function (req, res, next) {
     const { id } = req.params;
-    await Tour.findByIdAndDelete(id);
+    const tour = await Tour.findByIdAndDelete(id);
+
+    if (!tour) {
+        return next(new AppError("No tour found with that ID", 404));
+    }
 
     return res.status(204).json({
         status: "success",
