@@ -1,6 +1,13 @@
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 
+// Handellling Uncaught Exceptions
+process.on("uncaughtException", function (err) {
+    console.log("UNHUNDELED EXCEPTION :: SHUTTING DOWN THE SERVER");
+    console.log(err);
+    process.exit(1);
+});
+
 dotenv.config({ path: "./config.env" });
 const app = require("./app");
 
@@ -10,7 +17,7 @@ const app = require("./app");
 const DB_LOCAL = process.env.DATABASE_LOCAL;
 
 const port = process.env.PORT || 3000;
-app.listen(port, function () {
+const server = app.listen(port, function () {
     console.log("⌛ Connecting to Database...");
     // Connect with DataBase
     mongoose
@@ -23,4 +30,13 @@ app.listen(port, function () {
             console.log("(ノಠ益ಠ)ノ Database Connection Failed.");
             console.log(err);
         });
+});
+
+// Handlling Unhandled Rejections
+process.on("unhandledRejection", function (err) {
+    console.log("UNHUNDELED REJECTION :: SHUTTING DOWN THE SERVER");
+    console.log(err);
+    server.close(function () {
+        process.exit(1);
+    });
 });
