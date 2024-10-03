@@ -1,24 +1,24 @@
-class APIFeatures {
-    constructor(query, reqQuery) {
-        this.query = query;
+class QueryFeatures {
+    constructor(mongooseQuery, reqQuery) {
+        this.mongooseQuery = mongooseQuery;
         this.reqQuery = reqQuery;
     }
 
     filter() {
-        const filterObj = APIFeatures.processReqQuery(this.reqQuery);
-        this.query = this.query.find(filterObj);
+        const filterObj = QueryFeatures.processReqQuery(this.reqQuery);
+        this.mongooseQuery = this.mongooseQuery.find(filterObj);
         return this;
     }
 
     sort() {
-        const sortedBy = APIFeatures.processSortedBy(this.reqQuery.sort);
-        this.query = this.query.sort(sortedBy);
+        const sortedBy = QueryFeatures.processSortedBy(this.reqQuery.sort);
+        this.mongooseQuery = this.mongooseQuery.sort(sortedBy);
         return this;
     }
 
     limitFields() {
-        const fields = APIFeatures.processFields(this.reqQuery.fields);
-        this.query = this.query.select(fields);
+        const fields = QueryFeatures.processFields(this.reqQuery.fields);
+        this.mongooseQuery = this.mongooseQuery.select(fields);
         return this;
     }
 
@@ -26,7 +26,7 @@ class APIFeatures {
         const page = Number(this.reqQuery.page) || 1;
         const limit = Number(this.reqQuery.limit) || 50;
         const skip = (page - 1) * limit;
-        this.query = this.query.skip(skip).limit(limit);
+        this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
         return this;
     }
 
@@ -58,4 +58,4 @@ class APIFeatures {
     }
 }
 
-module.exports = APIFeatures;
+module.exports = QueryFeatures;

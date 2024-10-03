@@ -21,4 +21,4 @@ tourRouter
     .patch(tourController.updateTour)
     .delete(tourController.deleteTour);
 
-module.exports = { tourRouter };
+module.exports = tourRouter;

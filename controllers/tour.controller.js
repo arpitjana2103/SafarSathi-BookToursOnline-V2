@@ -1,5 +1,5 @@
 const { Tour } = require("../models/tour.model");
-const APIFeatures = require("../utils/apiFeatures.util");
+const QueryFeatures = require("../utils/QueryFeatures");
 
 exports.createTour = async function (req, res) {
     try {
@@ -20,10 +20,15 @@ exports.createTour = async function (req, res) {
 
 exports.getAllTours = async function (req, res) {
     try {
-        const query = Tour.find();
-        const features = new APIFeatures(query, req.query);
-        const tours = await features.filter().sort().limitFields().paginate()
-            .query;
+        const mongooseQuery = Tour.find();
+        const queryFeatures = new QueryFeatures(mongooseQuery, req.query);
+        const tourQuery = queryFeatures
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate().mongooseQuery;
+
+        const tours = await tourQuery;
 
         return res.status(200).json({
             status: "success",
@@ -40,12 +45,11 @@ exports.getAllTours = async function (req, res) {
 };
 
 exports.aliasTop5Cheap = async function (req, res, next) {
-    req.query = {
-        ...req.query,
+    req.query = Object.assign(req.query, {
         limit: "5",
-        sort: "-ratingsAverage,price",
-        fields: "name,price,ratingsAverage,summery,difficulty",
-    };
+        sort: "price,-ratingsAverage",
+        fields: "name,price,ratingsAverage,summery,difficulty,duration",
+    });
     next();
 };
 

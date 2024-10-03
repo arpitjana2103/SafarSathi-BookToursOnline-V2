@@ -93,7 +93,9 @@ const tourSchema = new mongoose.Schema(
     },
 );
 
-// Virtual Fields
+////////////////////////////////////////
+// Virtual Fields //////////////////////
+
 tourSchema.virtual("durationWeeks").get(function () {
     return this.duration / 7;
 });
