@@ -25,6 +25,13 @@
             {
                 "object": true,
                 "array": false
+            },
+            {
+                "enforceForRenamedProperties": false,
+                "enforceForComputedProperties": false,
+                "VariableDeclarator": {
+                    "object": false
+                }
             }
         ],
         "no-unused-vars": [
