@@ -117,7 +117,6 @@ exports.getMonthlyPlan = catchAsyncErrors(async function (req, res, next) {
 exports.getTour = catchAsyncErrors(async function (req, res, next) {
     const { id } = req.params;
     const tour = await Tour.findById(id);
-    console.log(tour);
 
     if (!tour) {
         return next(new AppError("No tour found with that ID", 404));

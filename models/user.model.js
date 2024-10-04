@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcrypt");
 
 const validatePassword = function (password) {
     return (
@@ -29,7 +30,7 @@ const userSchema = new mongoose.Schema({
     photo: String,
     password: {
         type: String,
-        required: true,
+        required: [true, "User must have a password"],
         validate: {
             validator: validatePassword,
             message:
@@ -39,7 +40,27 @@ const userSchema = new mongoose.Schema({
     passwordConfirm: {
         type: String,
         required: [true, "Please confirm your password"],
+        validate: {
+            validator: function (passwordConfirm) {
+                return this.password === passwordConfirm;
+            },
+            message: "Password and PasswordConfirm need to be same",
+        },
     },
+});
+
+////////////////////////////////////////
+// DOCUMENT MEDDLEWARE / HOOK //////////
+
+// runs before Model.prototype.save() and Model.create()
+userSchema.pre("save", async function (next) {
+    // Only Run the Function if the password is modified
+    if (!this.isModified("password")) return next();
+
+    // Hash Password
+    this.password = await bcrypt.hash(this.password, 12);
+    this.passwordConfirm = undefined;
+    next();
 });
 
 const User = mongoose.model("User", userSchema);
