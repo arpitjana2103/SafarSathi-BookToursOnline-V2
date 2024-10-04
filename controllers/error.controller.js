@@ -49,6 +49,9 @@ function sendErrForProd(err, res) {
     // Exmple : Fail schema validation
     err = handleValidationError(err);
 
+    // Handle JWT Error
+    err = handleJWTErrors(err);
+
     if (err.isOperational) {
         return res.status(err.statusCode).json({
             status: err.status,
@@ -57,7 +60,7 @@ function sendErrForProd(err, res) {
     }
 
     // Unknown Error Handelling in Production
-    // console.error(err);
+    console.error(err);
     return res.status(500).json({
         status: "error",
         message: "Something went very wrong !",
@@ -85,5 +88,19 @@ function handleValidationError(err) {
         const message = err.message;
         return new exports.AppError(message, 400);
     }
+    return err;
+}
+
+function handleJWTErrors(err) {
+    if (err.name === "JsonWebTokenError") {
+        message = "Invalid Token Found, Login again to get new token !";
+        return new exports.AppError(message, 401);
+    }
+
+    if (err.name === "TokenExpiredError") {
+        message = "Token has been Expired, Login agian to get new token !";
+        return new exports.AppError(message, 401);
+    }
+
     return err;
 }
