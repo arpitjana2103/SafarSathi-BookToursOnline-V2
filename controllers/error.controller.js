@@ -36,6 +36,34 @@ function sendErrForDev(err, res) {
     });
 }
 
+function sendErrForProd(err, res) {
+    // Handle DB Cast Error
+    // Exmple : Search for Invalid ID
+    err = handleCastErrorDB(err);
+
+    // Handle Duplicate Field Value Error
+    // Exmple : Repeating field value for unique field
+    err = handleDuplicateFieldsDB(err);
+
+    // Handle Validation Error
+    // Exmple : Fail schema validation
+    err = handleValidationError(err);
+
+    if (err.isOperational) {
+        return res.status(err.statusCode).json({
+            status: err.status,
+            message: err.message,
+        });
+    }
+
+    // Unknown Error Handelling in Production
+    // console.error(err);
+    return res.status(500).json({
+        status: "error",
+        message: "Something went very wrong !",
+    });
+}
+
 function handleCastErrorDB(err) {
     if (err.name === "CastError") {
         const message = `Invalid >> ${err.path} = "${err.value}"`;
@@ -58,29 +86,4 @@ function handleValidationError(err) {
         return new exports.AppError(message, 400);
     }
     return err;
-}
-
-function sendErrForProd(err, res) {
-    // Handle DB Cast Error
-    err = handleCastErrorDB(err);
-
-    // Handle Duplicate Field Value Error
-    err = handleDuplicateFieldsDB(err);
-
-    // Handle Validation Error
-    err = handleValidationError(err);
-
-    if (err.isOperational) {
-        return res.status(err.statusCode).json({
-            status: err.status,
-            message: err.message,
-        });
-    }
-
-    // Unknown Error Handelling in Production
-    // console.error(err);
-    return res.status(500).json({
-        status: "error",
-        message: "Something went very wrong !",
-    });
 }
