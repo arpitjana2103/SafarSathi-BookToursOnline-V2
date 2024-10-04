@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
             message:
                 "Password must be 5 to 20 characters and includes uppercase, lowercase & number.",
         },
+        select: false,
     },
     passwordConfirm: {
         type: String,
@@ -62,6 +63,24 @@ userSchema.pre("save", async function (next) {
     this.passwordConfirm = undefined;
     next();
 });
+
+// runs after Model.prototype.save() and Model.create()
+userSchema.post("save", function (doc, next) {
+    doc.password = undefined;
+    doc.__v = undefined;
+    next();
+});
+
+////////////////////////////////////////
+// Instance Method /////////////////////
+// These Methods will be availabe for all the Documents
+
+userSchema.methods.varifyPassword = async function (
+    rawPassord,
+    hashedPassword,
+) {
+    return await bcrypt.compare(rawPassord, hashedPassword);
+};
 
 const User = mongoose.model("User", userSchema);
 

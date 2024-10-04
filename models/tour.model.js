@@ -111,7 +111,7 @@ tourSchema.pre("save", function (next) {
 
 // runs after Model.prototype.save() and Model.create()
 tourSchema.post("save", function (doc, next) {
-    // console.log(doc);
+    doc.__v = undefined;
     next();
 });
 
