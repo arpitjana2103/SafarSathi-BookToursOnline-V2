@@ -50,6 +50,7 @@ function sendErrForProd(err, res) {
     err = handleValidationError(err);
 
     // Handle JWT Error
+    // Exmple : Token Expires, Invalid JWT
     err = handleJWTErrors(err);
 
     if (err.isOperational) {
@@ -92,11 +93,12 @@ function handleValidationError(err) {
 }
 
 function handleJWTErrors(err) {
+    // Invalid JWT
     if (err.name === "JsonWebTokenError") {
         message = "Invalid Token Found, Login again to get new token !";
         return new exports.AppError(message, 401);
     }
-
+    // Token Expired
     if (err.name === "TokenExpiredError") {
         message = "Token has been Expired, Login agian to get new token !";
         return new exports.AppError(message, 401);
