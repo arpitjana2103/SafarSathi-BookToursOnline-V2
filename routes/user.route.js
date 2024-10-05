@@ -7,6 +7,6 @@ userRouter.route("/signup").post(authController.signup);
 userRouter.route("/login").post(authController.login);
 
 userRouter.route("/forgetPassword").post(authController.forgetPassword);
-// userRouter.route("/resetPassword", authController.rese);
+userRouter.route("/resetPassword/:token", authController.resetPassword);
 
 module.exports = userRouter;

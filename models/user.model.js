@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
-const Helper = require("../utils/Helper");
+const Helper = require("../utils/helper.util");
 
 const validatePassword = function (password) {
     return (

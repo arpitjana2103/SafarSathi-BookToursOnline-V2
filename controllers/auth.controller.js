@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { promisify } = require("util");
 const { catchAsyncErrors, AppError } = require("./error.controller");
+const sendEmail = require("../utils/email.util");
 
 const signToken = function (id) {
     const payload = { id: id };
@@ -101,22 +102,40 @@ exports.restrictTo = function (...roles) {
 };
 
 exports.forgetPassword = catchAsyncErrors(async function (req, res, next) {
-    // 1) Get user based on POSTed Email
+    // [1] Get user based on POSTed Email
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
         return next(new AppError("No user found", 404));
     }
 
-    // 2) Generate Random Reset Token
+    // [2] Generate Random Reset Token
     const resetToken = await user.createPasswordResetToken();
     user.passwordResetToken = await bcrypt.hash(resetToken, 1);
     user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
     await user.save({ validateBeforeSave: false });
 
-    // 3) Set it to User Email
-    res.status(200).json({
-        status: "success",
-        message: "OTP will be valid for next 10 minutes",
-        otp: resetToken,
-    });
+    // [3] Send it to User Email
+    const baseURL = `${req.protocol}://${req.get("host")}`;
+    const resetURL = `${baseURL}/api/v1/users/resetPassword/${resetToken}`;
+
+    const message = `Dear ${user.name},\nForgot your password ? Please follow the instructions below to reset your password.\n\nSubmit a PATCH request to: "${resetURL}"\nRequest Body: {"password": "<new-password>", "passwordConfirm": "<new-password>"}\n\nNote: This URL will be valid for next 10 minutes\nIf you didn't forget your password, please ignore this email!\n\nThanks,\nThe SafarSathi Team`;
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: "SararSathi : Reset Password Instructions",
+            message: message,
+        });
+
+        return res.status(200).json({
+            status: "success",
+            message:
+                "An email with password-reset instructions has been sent on your registered email address.",
+        });
+    } catch (error) {
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+        next(new AppError("There was an error in Sending Email", 500));
+    }
 });
