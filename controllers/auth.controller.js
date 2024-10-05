@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const { promisify } = require("util");
 const { catchAsyncErrors, AppError } = require("./error.controller");
 
@@ -98,3 +99,24 @@ exports.restrictTo = function (...roles) {
         next();
     };
 };
+
+exports.forgetPassword = catchAsyncErrors(async function (req, res, next) {
+    // 1) Get user based on POSTed Email
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+        return next(new AppError("No user found", 404));
+    }
+
+    // 2) Generate Random Reset Token
+    const resetToken = await user.createPasswordResetToken();
+    user.passwordResetToken = await bcrypt.hash(resetToken, 1);
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+    await user.save({ validateBeforeSave: false });
+
+    // 3) Set it to User Email
+    res.status(200).json({
+        status: "success",
+        message: "OTP will be valid for next 10 minutes",
+        otp: resetToken,
+    });
+});

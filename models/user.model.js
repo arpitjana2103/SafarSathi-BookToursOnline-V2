@@ -1,6 +1,8 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+const Helper = require("../utils/Helper");
 
 const validatePassword = function (password) {
     return (
@@ -54,6 +56,8 @@ const userSchema = new mongoose.Schema({
         },
     },
     passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
 });
 
 ////////////////////////////////////////
@@ -94,6 +98,13 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
         return JWTTimestamp < changedTimeStamp;
     }
     return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+    const fourDigitNum = Helper.getRandomNum(1000, 9999);
+    const fourAlphaStr = Helper.getRandomAlphabets(4);
+    const token = `${fourDigitNum}-${fourAlphaStr}`;
+    return token;
 };
 
 const User = mongoose.model("User", userSchema);
