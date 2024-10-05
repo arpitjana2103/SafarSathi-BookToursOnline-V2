@@ -1,6 +1,6 @@
 exports.getRandomNum = function (min, max) {
     const randomVal = Math.random();
-    return Math.trunc(randomVal * (max - min + 1)) + min;
+    return Math.floor(randomVal * (max - min + 1)) + min;
 };
 
 exports.getRandomAlphabets = function (length) {
@@ -11,7 +11,7 @@ exports.getRandomAlphabets = function (length) {
     return String.fromCharCode(...randomArr);
 };
 
-exports.milliSecond = function ({ hours, minutes, seconds }) {
+exports.convertToMilliseconds = function ({ hours, minutes, seconds }) {
     let res = 0;
     if (hours) {
         res += hours * 60 * 60 * 1000;
