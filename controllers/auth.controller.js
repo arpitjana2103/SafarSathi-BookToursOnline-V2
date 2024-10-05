@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const { promisify } = require("util");
 const { catchAsyncErrors, AppError } = require("./error.controller");
 const sendEmail = require("../utils/email.util");
+const Helper = require("../utils/helper.util");
 
 const signToken = function (id) {
     const payload = { id: id };
@@ -110,15 +111,18 @@ exports.forgetPassword = catchAsyncErrors(async function (req, res, next) {
 
     // [2] Generate Random Reset Token
     const resetToken = await user.createPasswordResetToken();
+
+    // [3] Update User
     user.passwordResetToken = await bcrypt.hash(resetToken, 1);
-    user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+    user.passwordResetTokenExpires =
+        Date.now() + Helper.milliSecond({ minutes: 10, hours: 1 });
     await user.save({ validateBeforeSave: false });
 
-    // [3] Send it to User Email
+    // [4] Send Token to User-Email
     const baseURL = `${req.protocol}://${req.get("host")}`;
     const resetURL = `${baseURL}/api/v1/users/resetPassword/${resetToken}`;
 
-    const message = `Dear ${user.name},\nForgot your password ? Please follow the instructions below to reset your password.\n\nSubmit a PATCH request to: "${resetURL}"\nRequest Body: {"password": "<new-password>", "passwordConfirm": "<new-password>"}\n\nNote: This URL will be valid for next 10 minutes\nIf you didn't forget your password, please ignore this email!\n\nThanks,\nThe SafarSathi Team`;
+    const message = `Dear ${user.name},\n\nWe received a request to reset your password.\nIf this was you, please follow the instructions below:\n\nSubmit a - PATCH - request to the following URL:\n"${resetURL}"\n\nRequest Body: \n{\n  "password": "<new-password>",\n  "passwordConfirm": "<new-password>",\n  "email": "${user.email}"\n}\n\nNote: This link will be valid for next 10 minutes\nIf you did not request a password reset, you can safely ignore this email.\n\nThanks,\nThe SafarSathi Team`;
 
     try {
         await sendEmail({
@@ -130,12 +134,54 @@ exports.forgetPassword = catchAsyncErrors(async function (req, res, next) {
         return res.status(200).json({
             status: "success",
             message:
-                "An email with password-reset instructions has been sent on your registered email address.",
+                "Password reset instructions have been sent to your registered email.",
         });
     } catch (error) {
         user.passwordResetToken = undefined;
-        user.passwordResetExpires = undefined;
+        user.passwordResetTokenExpires = undefined;
         await user.save({ validateBeforeSave: false });
         next(new AppError("There was an error in Sending Email", 500));
     }
+});
+
+exports.resetPassword = catchAsyncErrors(async function (req, res, next) {
+    // [1] Get User base on Email
+    const { email } = req.body;
+    const user = await User.findOne({
+        email: email,
+    });
+    if (!user) {
+        return next(
+            new AppError("No user found with the email-address provided."),
+        );
+    }
+
+    // [3] Check if Token Invalid
+    const rawToken = req.params.token;
+    const hashedToken = user.passwordResetToken;
+    const isTokenInvalid = !(await user.varifyToken(rawToken, hashedToken));
+    if (isTokenInvalid) {
+        return next(new AppError("Password-Reset-Link invalid !", 400));
+    }
+
+    // [4] Check if Token Expired
+    const resetTokenExpiredAt = user.passwordResetTokenExpires.getTime();
+    const tokenExpired = resetTokenExpiredAt < Date.now();
+    if (tokenExpired) {
+        return next(new AppError("Password-Reset-Link expired !", 400));
+    }
+
+    // [2] Set new password
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpires = undefined;
+    user.save();
+
+    // [3] Log the user in, send JWT
+    const jwt = signToken(newUser._id);
+    return res.status(200).json({
+        status: "success",
+        token: jwt,
+    });
 });

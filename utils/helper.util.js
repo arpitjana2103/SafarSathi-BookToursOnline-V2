@@ -10,3 +10,17 @@ exports.getRandomAlphabets = function (length) {
     }
     return String.fromCharCode(...randomArr);
 };
+
+exports.milliSecond = function ({ hours, minutes, seconds }) {
+    let res = 0;
+    if (hours) {
+        res += hours * 60 * 60 * 1000;
+    }
+    if (minutes) {
+        res += minutes * 60 * 1000;
+    }
+    if (seconds) {
+        res += seconds * 1000;
+    }
+    return res;
+};
