@@ -68,7 +68,6 @@ exports.protect = catchAsyncErrors(async function (req, res, next) {
     // [2] Verify token
     const jwtSecretKey = process.env.JWT_SECRET;
     const decoded = await promisify(jwt.verify)(token, jwtSecretKey);
-    console.log(decoded);
 
     // [3] Check if user still exists
     const user = await User.findById(decoded.id);

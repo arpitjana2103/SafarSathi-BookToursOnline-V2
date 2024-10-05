@@ -15,37 +15,37 @@ const validatePassword = function (password) {
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        require: [true, "User must have a name"],
+        require: [true, "(( User must have a name ))"],
     },
     email: {
         type: String,
-        required: [true, "User must have email"],
+        required: [true, "(( User must have email ))"],
         unique: true,
         lowercase: true,
         validate: {
             validator: validator.isEmail,
-            message: "Invalid email address",
+            message: "(( Invalid email address ))",
         },
     },
     photo: String,
     password: {
         type: String,
-        required: [true, "User must have a password"],
+        required: [true, "(( User must have a password ))"],
         validate: {
             validator: validatePassword,
             message:
-                "Password must be 5 to 20 characters and includes uppercase, lowercase & number.",
+                "(( Password must be 5 to 20 characters and includes uppercase, lowercase & number ))",
         },
         select: false,
     },
     passwordConfirm: {
         type: String,
-        required: [true, "Please confirm your password"],
+        required: [true, "(( Please confirm your password ))"],
         validate: {
             validator: function (passwordConfirm) {
                 return this.password === passwordConfirm;
             },
-            message: "Password and PasswordConfirm need to be same",
+            message: "(( Password and PasswordConfirm need to be same ))",
         },
     },
     passwordChangedAt: Date,
