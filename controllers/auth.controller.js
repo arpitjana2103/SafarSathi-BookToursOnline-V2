@@ -183,3 +183,25 @@ exports.resetPassword = catchAsyncErrors(async function (req, res, next) {
         token: jwt,
     });
 });
+
+exports.updatePassword = catchAsyncErrors(async function (req, res, next) {
+    // [1] Get user from collection
+    const user = await User.findById(req.user.id).select("+password");
+
+    // [2] Check if POSTed passowrd is correct
+    if (!(await user.varifyPassword(req.body.currPassword, user.password))) {
+        return next(new AppError("Your current password is wrong.", 401));
+    }
+
+    // [3] Update the Password
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    await user.save();
+
+    // [4] Log in User and send JWT
+    const jwt = signToken(user._id);
+    return res.status(200).json({
+        status: "success",
+        token: jwt,
+    });
+});

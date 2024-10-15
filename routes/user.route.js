@@ -8,5 +8,8 @@ userRouter.route("/login").post(authController.login);
 
 userRouter.route("/forgetPassword").post(authController.forgetPassword);
 userRouter.route("/resetPassword/:token").patch(authController.resetPassword);
+userRouter
+    .route("/updatePassword")
+    .patch(authController.protect, authController.updatePassword);
 
 module.exports = userRouter;
