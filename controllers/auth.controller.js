@@ -6,8 +6,8 @@ const { catchAsyncErrors, AppError } = require("./error.controller");
 const sendEmail = require("../utils/email.util");
 const Helper = require("../utils/helper.util");
 
-const signToken = function (id) {
-    const payload = { id: id };
+const signToken = function (userId) {
+    const payload = { id: userId };
     const jwtSecretKey = process.env.JWT_SECRET;
     const jwtExpiresIn = process.env.JWT_EXPIRES_IN;
     const token = jwt.sign(payload, jwtSecretKey, { expiresIn: jwtExpiresIn });
@@ -105,7 +105,7 @@ exports.forgetPassword = catchAsyncErrors(async function (req, res, next) {
     // [1] Get user based on POSTed Email
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-        return next(new AppError("No user found", 404));
+        return next(new AppError("No user found !", 404));
     }
 
     // [2] Generate Random Reset Token
@@ -133,7 +133,7 @@ exports.forgetPassword = catchAsyncErrors(async function (req, res, next) {
         return res.status(200).json({
             status: "success",
             message:
-                "Password reset instructions have been sent to your registered email.",
+                "Password reset instructions have been sent to your registered email-address.",
         });
     } catch (error) {
         user.passwordResetToken = undefined;
@@ -164,6 +164,12 @@ exports.resetPassword = catchAsyncErrors(async function (req, res, next) {
     }
 
     // [4] Check if Token Expired
+    /*
+    Exmple : 
+    let say user forgetPassword at 8.00
+    then passwordResetLink is valid upto 8.10
+    if Date.now() is 8.15 then user is not allowed to reset password with that link
+    */
     const resetTokenExpiredAt = user.passwordResetTokenExpires.getTime();
     if (resetTokenExpiredAt < Date.now()) {
         return next(new AppError("Password-Reset-Link expired !", 400));

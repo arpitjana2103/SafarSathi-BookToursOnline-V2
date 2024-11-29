@@ -13,13 +13,16 @@ tourRouter
 
 tourRouter
     .route("/")
-    .post(tourController.createTour)
-    .get(authController.protect, tourController.getAllTours);
+    .post(authController.restrictTo("admin"), tourController.createTour)
+    .get(tourController.getAllTours);
 
 tourRouter
     .route("/:id")
     .get(tourController.getTour)
-    .patch(tourController.updateTour)
+    .patch(
+        authController.restrictTo("admin", "lead-guide"),
+        tourController.updateTour,
+    )
     .delete(
         authController.protect,
         authController.restrictTo("admin", "lead-guide"),

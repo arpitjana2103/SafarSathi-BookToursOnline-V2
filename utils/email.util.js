@@ -1,5 +1,12 @@
 const nodemailer = require("nodemailer");
 
+/*
+Here we are using a service "MailTrap".
+
+MailTrap allow us to capture emails without sending 
+it into actual email-address.
+*/
+
 const sendEmail = async function (options) {
     // [1] Transporter
     const transporter = nodemailer.createTransport({

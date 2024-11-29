@@ -27,6 +27,9 @@ exports.globalErrorHandeller = function (err, req, res, next) {
     }
 };
 
+//////////////////////////////////////////
+//// Helper Functions for Error Handelling
+
 function sendErrForDev(err, res) {
     return res.status(err.statusCode).json({
         status: err.status,

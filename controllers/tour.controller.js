@@ -13,6 +13,7 @@ exports.createTour = catchAsyncErrors(async function (req, res, next) {
 });
 
 exports.getAllTours = catchAsyncErrors(async function (req, res, next) {
+    console.log(req.query);
     const mongooseQuery = Tour.find();
     const queryFeatures = new QueryFeatures(mongooseQuery, req.query);
     const query = queryFeatures
@@ -109,7 +110,7 @@ exports.getMonthlyPlan = catchAsyncErrors(async function (req, res, next) {
 
     return res.status(200).json({
         status: "success",
-        info: 'month "1" is month "January"',
+        info: 'month "1" represents month "January"',
         plan: plan,
     });
 });
@@ -119,7 +120,7 @@ exports.getTour = catchAsyncErrors(async function (req, res, next) {
     const tour = await Tour.findById(id);
 
     if (!tour) {
-        return next(new AppError("No tour found with that ID", 404));
+        return next(new AppError("No tour found !", 404));
     }
 
     return res.status(200).json({
@@ -136,7 +137,7 @@ exports.updateTour = catchAsyncErrors(async function (req, res, next) {
     });
 
     if (!tour) {
-        return next(new AppError("No tour found with that ID", 404));
+        return next(new AppError("No tour found !", 404));
     }
 
     return res.status(200).json({

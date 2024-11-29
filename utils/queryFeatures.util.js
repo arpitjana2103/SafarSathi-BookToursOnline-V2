@@ -24,7 +24,7 @@ class QueryFeatures {
 
     paginate() {
         const page = Number(this.reqQuery.page) || 1;
-        const limit = Number(this.reqQuery.limit) || 50;
+        const limit = Number(this.reqQuery.limit) || 5;
         const skip = (page - 1) * limit;
         this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
         return this;

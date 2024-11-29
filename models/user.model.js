@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
-const Helper = require("../utils/helper.util");
+const helper = require("../utils/helper.util");
 
 const validatePassword = function (password) {
     return (
@@ -114,8 +114,8 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 };
 
 userSchema.methods.createPasswordResetToken = function () {
-    const fourDigitNum = Helper.getRandomNum(1000, 9999);
-    const fourAlphaStr = Helper.getRandomAlphabets(4);
+    const fourDigitNum = helper.getRandomNum(1000, 9999);
+    const fourAlphaStr = helper.getRandomAlphabets(4);
     const token = `${fourDigitNum}-${fourAlphaStr}`;
     return token;
 };

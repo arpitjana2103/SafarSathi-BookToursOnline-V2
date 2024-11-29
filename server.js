@@ -32,10 +32,11 @@ const server = app.listen(port, function () {
         });
 });
 
-// Handlling Unhandled Rejections
+// Handlling Unhandled Promess Rejections
 process.on("unhandledRejection", function (err) {
     console.log("UNHUNDELED REJECTION :: SHUTTING DOWN THE SERVER");
     console.log(err);
+    // Shutting down gracefully.
     server.close(function () {
         process.exit(1);
     });
