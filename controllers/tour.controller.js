@@ -13,7 +13,6 @@ exports.createTour = catchAsyncErrors(async function (req, res, next) {
 });
 
 exports.getAllTours = catchAsyncErrors(async function (req, res, next) {
-    console.log(req.query);
     const mongooseQuery = Tour.find();
     const queryFeatures = new QueryFeatures(mongooseQuery, req.query);
     const query = queryFeatures
