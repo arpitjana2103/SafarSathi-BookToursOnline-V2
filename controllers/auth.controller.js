@@ -13,24 +13,41 @@ const signToken = function (userId) {
     const token = jwt.sign(payload, jwtSecretKey, { expiresIn: jwtExpiresIn });
     return token;
 };
+const signAndSendToken = function (user, statusCode, res) {
+    const token = signToken(user._id);
+    const cookieOptions = {
+        expires: new Date(
+            Date.now() +
+                process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+        ),
+        secure: process.env.NODE_ENV === "production" ? true : false,
+        httpOnly: true,
+    };
+
+    res.cookie("jwt", token, cookieOptions);
+    return res.status(statusCode).json({
+        status: "success",
+        token: token,
+        data: {
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
+        },
+    });
+};
 
 exports.signup = catchAsyncErrors(async function (req, res, next) {
-    const newUser = await User.create({
+    const user = await User.create({
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
         passwordConfirm: req.body.passwordConfirm,
     });
 
-    const token = signToken(newUser._id);
-
-    return res.status(200).json({
-        status: "success",
-        token: token,
-        data: {
-            user: newUser,
-        },
-    });
+    signAndSendToken(user, 201, res);
 });
 
 exports.login = catchAsyncErrors(async function (req, res, next) {
@@ -49,12 +66,7 @@ exports.login = catchAsyncErrors(async function (req, res, next) {
     }
 
     // [3] If everything ok, send Token to client
-    const token = signToken(user._id);
-
-    res.status(200).json({
-        status: "success",
-        token: token,
-    });
+    signAndSendToken(user, 200, res);
 });
 
 exports.protect = catchAsyncErrors(async function (req, res, next) {
@@ -183,11 +195,7 @@ exports.resetPassword = catchAsyncErrors(async function (req, res, next) {
     await user.save();
 
     // [3] Log the user in, send JWT
-    const jwt = signToken(user._id);
-    return res.status(200).json({
-        status: "success",
-        token: jwt,
-    });
+    signAndSendToken(user, 200, res);
 });
 
 exports.updatePassword = catchAsyncErrors(async function (req, res, next) {
@@ -205,9 +213,5 @@ exports.updatePassword = catchAsyncErrors(async function (req, res, next) {
     await user.save();
 
     // [4] Log in User and send JWT
-    const jwt = signToken(user._id);
-    return res.status(200).json({
-        status: "success",
-        token: jwt,
-    });
+    signAndSendToken(user, 200, res);
 });
