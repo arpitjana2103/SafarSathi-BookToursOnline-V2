@@ -88,13 +88,6 @@ const tourSchema = new mongoose.Schema(
             default: false,
             select: false,
         },
-        secretTour: {
-            type: {
-                type: Boolean,
-                default: false,
-            },
-            select: false,
-        },
         startLocation: {
             // GeoJSON
             type: {
@@ -166,6 +159,14 @@ tourSchema.post("save", function (doc, next) {
 tourSchema.pre(/^find/, function (next) {
     this.find({ secretTour: { $ne: true } });
     this.start = Date.now();
+    next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: "guides",
+        select: "name email photo role",
+    });
     next();
 });
 
