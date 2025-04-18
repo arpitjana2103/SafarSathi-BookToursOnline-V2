@@ -53,7 +53,7 @@ class QueryFeatures {
     }
 
     static processFields(fieldsStr) {
-        if (!fieldsStr) return "-__v";
+        if (!fieldsStr) return "";
         return fieldsStr.replace(/,/g, " ");
     }
 }

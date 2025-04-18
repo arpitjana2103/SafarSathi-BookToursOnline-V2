@@ -13,6 +13,7 @@ const signToken = function (userId) {
     const token = jwt.sign(payload, jwtSecretKey, { expiresIn: jwtExpiresIn });
     return token;
 };
+
 const signAndSendToken = function (user, statusCode, res) {
     const token = signToken(user._id);
     const cookieOptions = {
@@ -58,7 +59,7 @@ exports.login = catchAsyncErrors(async function (req, res, next) {
         return next(new AppError("Please provide email and password!", 400));
     }
 
-    // [2] Check If User exists and Password is correct
+    // [2] Check If User exists and Password is correct+
     const user = await User.findOne({ email: email }).select("+password");
 
     if (!user || !(await user.varifyPassword(password, user.password))) {

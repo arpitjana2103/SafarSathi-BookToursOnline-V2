@@ -5,6 +5,7 @@ const { AppError } = require("./controllers/error.controller");
 const { globalErrorHandeller } = require("./controllers/error.controller");
 const tourRouter = require("./routes/tour.route");
 const userRouter = require("./routes/user.route");
+const reviewRouter = require("./routes/review.route");
 const rateLimit = require("express-rate-limit");
 
 const app = express();
@@ -29,6 +30,7 @@ app.use("/api", limiter);
 // Router Middleware
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 // Handelling Unhandelled Routes
 app.all("*", function (req, res, next) {

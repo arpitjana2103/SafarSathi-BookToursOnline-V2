@@ -32,6 +32,11 @@ const reviewSchema = new mongoose.Schema(
     },
 );
 
+reviewSchema.post("save", function (doc, next) {
+    doc.__v = undefined;
+    next();
+});
+
 const Review = mongoose.model("Review", reviewSchema);
 
 module.exports = Review;
